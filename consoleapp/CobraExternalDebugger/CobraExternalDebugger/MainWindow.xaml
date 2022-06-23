@@ -1,0 +1,239 @@
+﻿<Window x:Class="CobraExternalDebugger.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CobraExternalDebugger"
+        mc:Ignorable="d"
+		Closing="OnWindowClose"
+		StateChanged="Window_StateChanged"
+        Title="Cobra External Debugger" Height="720" Width="1280">
+	<WindowChrome.WindowChrome>
+		<WindowChrome CaptionHeight="32" ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}" />
+	</WindowChrome.WindowChrome>
+	<Window.Resources>
+		<SolidColorBrush x:Key="TextboxColour" Color="#31353b" />
+		<SolidColorBrush x:Key="BackgroundColour" Color="#1f2124" />
+		<SolidColorBrush x:Key="BackgroundColourTitle" Color="#17181a" />
+		<SolidColorBrush x:Key="TextboxTextColour" Color="#e4e7ed" />
+
+	</Window.Resources>
+	<Border Background="{StaticResource BackgroundColour}" Style="{StaticResource WindowMainPanelStyle}">
+		<Grid Background="{StaticResource BackgroundColour}" Style="{StaticResource WindowMarginStyle}">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition />
+			</Grid.RowDefinitions>
+
+			<Grid Grid.Row="0" Background="{StaticResource BackgroundColour}">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+
+				<Image
+					Grid.Column="0"
+					Width="22"
+					Height="22"
+					Margin="8"
+					VerticalAlignment="Top"
+					Source="frontier.ico" />
+
+				<TextBlock
+					Grid.Column="1"
+					Margin="4, 0, 0, 0"
+					VerticalAlignment="Center"
+					FontSize="14"
+					Foreground="{DynamicResource WindowTitleBarInactiveText}"
+					Text="Cobra External Debugger">
+					<TextBlock.Style>
+						<Style TargetType="TextBlock">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType=Window}}" Value="False">
+									<Setter Property="Foreground" Value="{DynamicResource WindowTitleBarInactiveText}" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</TextBlock.Style>
+				</TextBlock>
+
+				<Button
+					VerticalAlignment="Top"
+					Grid.Column="2"
+					Click="OnMinimizeButtonClick"
+					RenderOptions.EdgeMode="Aliased"
+					Style="{StaticResource TitleBarButtonStyle}">
+					<Path
+						Width="46"
+						Height="32"
+						Data="M 18,15 H 28"
+						Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+						StrokeThickness="1" />
+				</Button>
+				<Button
+					VerticalAlignment="Top"
+					Name="maximizeButton"
+					Grid.Column="3"
+					Click="OnMaximizeRestoreButtonClick"
+					Style="{StaticResource TitleBarButtonStyle}">
+					<Path
+					Width="46"
+					Height="32"
+					Data="M 18.5,10.5 H 27.5 V 19.5 H 18.5 Z"
+					Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+					StrokeThickness="1" />
+				</Button>
+				<Button
+					VerticalAlignment="Top"
+					Name="restoreButton"
+					Grid.Column="3"
+					Click="OnMaximizeRestoreButtonClick"
+					Style="{StaticResource TitleBarButtonStyle}">
+					<Path
+						Width="46"
+						Height="32"
+						Data="M 18.5,12.5 H 25.5 V 19.5 H 18.5 Z M 20.5,12.5 V 10.5 H 27.5 V 17.5 H 25.5"
+						Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+						StrokeThickness="1" />
+				</Button>
+				<Button
+					VerticalAlignment="Top"
+					Grid.Column="4"
+					Click="OnCloseButtonClick"
+					Style="{StaticResource TitleBarCloseButtonStyle}">
+					<Path
+						Width="46"
+						Height="32"
+						Data="M 18,11 27,20 M 18,20 27,11"
+						Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+						StrokeThickness="1" />
+				</Button>
+			</Grid>
+
+			<Grid Grid.Row="1" Margin="10,10,10,10" >
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition />
+					<ColumnDefinition Width="300" />
+				</Grid.ColumnDefinitions>
+
+				<Grid Grid.Row="0">
+					<Grid.RowDefinitions>
+						<RowDefinition />
+						<RowDefinition Height="30"/>
+					</Grid.RowDefinitions>
+					<Grid Grid.Row="0" Margin="0,0,0,10" >
+						<RichTextBox x:Name="ConsoleText" Grid.Row="1" Block.LineHeight="2" Background="{StaticResource TextboxColour}" Foreground="{StaticResource TextboxTextColour}" IsReadOnly="True" AcceptsReturn="True" Margin="0,0,0,0" Padding="6,6,6,6" VerticalContentAlignment="Bottom" VerticalScrollBarVisibility="Visible">
+							<FlowDocument>
+							</FlowDocument>
+						</RichTextBox>
+					</Grid>
+					<Grid Grid.Row="1">
+						<TextBox x:Name="InputText" Grid.Row="1" Background="{StaticResource TextboxColour}" Foreground="{StaticResource TextboxTextColour}" FontWeight="Bold" Margin="0,0,0,0" Padding="6,5,0,0" Height="30" TextWrapping="Wrap" VerticalAlignment="Top" />
+					</Grid>
+				</Grid>
+				<Grid Grid.Column="1" Grid.Row="1" Margin="10,0,0,0">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="40"/>
+						<RowDefinition Height="60"/>
+						<RowDefinition Height="60"/>
+						<RowDefinition Height="40"/>
+						<RowDefinition Height="115"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="10"/>
+						<RowDefinition />
+					</Grid.RowDefinitions>
+
+					<Separator Grid.Row="0" Margin="0,0,0,0" VerticalAlignment="Top" />
+
+					<Label Grid.Row="0" FontWeight="Bold" Foreground="Gray" Content="On Game Relaunch" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top"/>
+					<Label Grid.Row="1" Foreground="{StaticResource TextboxTextColour}" Content="Application" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
+
+					<ComboBox Grid.Row="1" x:Name="ApplicationDropdown" Margin="0,30,0,0" VerticalAlignment="Top" SelectionChanged="OnSelectionChanged_ApplicationDropdown">
+						<ComboBoxItem Content="Jurassic World Evolution" Tag="jwe" />
+						<ComboBoxItem Content="Jurassic World Evolution 2" Tag="jwe2" IsSelected="True" />
+						<ComboBoxItem Content="Planet Zoo" Tag="planetzoo" />
+					</ComboBox>
+
+					<Grid Grid.Row="2">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition />
+							<ColumnDefinition />
+						</Grid.ColumnDefinitions>
+
+						<Label Grid.Column="0" Foreground="{StaticResource TextboxTextColour}" Content="Clear Console" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
+						<CheckBox x:Name="ClearConsoleCheckbox" Grid.Column="0" Content="" HorizontalAlignment="Left" Margin="5,30,0,0" VerticalAlignment="Top" Unchecked="OnCheck_ClearConsoleCheckbox" Checked="OnCheck_ClearConsoleCheckbox">
+							<CheckBox.LayoutTransform>
+								<ScaleTransform ScaleX="1.2" ScaleY="1.2" />
+							</CheckBox.LayoutTransform>
+						</CheckBox>
+
+						<Label Grid.Column="1" Foreground="{StaticResource TextboxTextColour}" Content="Clear Command Cache" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top"/>
+						<CheckBox x:Name="ClearCommandsCheckbox" Grid.Column="1" Content="" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.6,0.6" Unchecked="OnCheck_ClearCommandsCheckbox" Checked="OnCheck_ClearCommandsCheckbox">
+							<CheckBox.LayoutTransform>
+								<ScaleTransform ScaleX="1.2" ScaleY="1.2" />
+							</CheckBox.LayoutTransform>
+						</CheckBox>
+					</Grid>
+
+					<Separator Grid.Row="3" VerticalAlignment="Top" />
+					<Label Grid.Row="3" FontWeight="Bold" Foreground="Gray" Content="Other" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top"/>
+
+					<Grid Grid.Row="4">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition />
+							<ColumnDefinition />
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="60" />
+							<RowDefinition />
+						</Grid.RowDefinitions>
+
+						<Label Grid.Column="1" Grid.Row="0" Foreground="{StaticResource TextboxTextColour}" Content="Auto Scroll" HorizontalAlignment="Left" Margin="5,0,0,0" VerticalAlignment="Top"/>
+						<CheckBox x:Name="AutoScrollCheckbox" IsChecked="True" Grid.Column="1" Grid.Row="0" Content="" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Unchecked="OnCheck_AutoScrollCheckbox" Checked="OnCheck_AutoScrollCheckbox">
+							<CheckBox.LayoutTransform>
+								<ScaleTransform ScaleX="1.2" ScaleY="1.2" />
+							</CheckBox.LayoutTransform>
+						</CheckBox>
+
+						<Label Grid.Row="0" Grid.Column="0" Foreground="{StaticResource TextboxTextColour}" Content="Port" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
+
+						<TextBox Grid.Row="0" x:Name="PortInput" Grid.Column="0" Text="8080" Background="{StaticResource TextboxColour}" Foreground="{StaticResource TextboxTextColour}" FontWeight="Bold" Margin="5,30,5,0" Padding="6,5,0,0" Height="30" TextWrapping="Wrap" VerticalAlignment="Top" />
+
+						<Button Grid.Row="1" Grid.Column="0" Content="Restart Server" Margin="5,10,5,0" VerticalAlignment="Top" Height="30" Click="OnClick_RestartServer" />
+					</Grid>
+
+					<Separator Grid.Row="5" Margin="0,0,0,0" VerticalAlignment="Top" />
+
+					<Grid Grid.Row="7">
+						<Grid Margin="0,0,0,0">
+							<Grid.RowDefinitions>
+								<RowDefinition />
+								<RowDefinition Height="40"/>
+								<RowDefinition Height="40"/>
+								<RowDefinition Height="40"/>
+								<RowDefinition Height="40"/>
+								<RowDefinition Height="40"/>
+								<RowDefinition Height="40"/>
+							</Grid.RowDefinitions>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="145" />
+								<ColumnDefinition Width="145" />
+							</Grid.ColumnDefinitions>
+
+							<Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Content="Export As..." Margin="0,0,0,0" VerticalAlignment="Bottom" Height="30" Click="OnClick_ExportTo"/>
+							<TextBox Grid.Row="2" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" x:Name="ExportText" Background="{StaticResource TextboxColour}" Foreground="{StaticResource TextboxTextColour}" FontWeight="Bold" Margin="0,10,0,0" Padding="6,5,6,0" TextWrapping="Wrap"/>
+							<Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Content="Export To Above" Margin="0,0,0,0" VerticalAlignment="Bottom" Height="30" Click="OnClick_Export"/>
+
+							<Button Grid.Row="6" Grid.Column="0" Content="Clear Console" Margin="0,0,5,0" VerticalAlignment="Bottom" Height="30" Click="OnClick_ClearConsole"/>
+							<Button Grid.Row="6" Grid.Column="1" Content="Clear Commands" Margin="5,0,0,0" VerticalAlignment="Bottom" Height="30" Click="OnClick_ClearCommands"/>
+						</Grid>
+					</Grid>
+				</Grid>
+
+			</Grid>
+		</Grid>
+	</Border>
+</Window>
