@@ -6,6 +6,7 @@ local pairs = global.pairs
 local ipairs = global.ipairs
 local string = global.string
 local tostring = global.tostring
+local loadfile = global.loadfile
 local CobraExternalDebugger = module(...)
 
 CobraExternalDebugger.oldTrace = api.debug.Trace
@@ -15,11 +16,23 @@ CobraExternalDebugger.oldQuit = api.game.Quit
 
 api.cobradebugger = {}
 
+local LoadConfig = function()
+	local env = {}
+	
+	local chunk, err = loadfile('Win64\\ovldata\\CobraExternalDebugger\\Config.CobraExternalDebugger.ini', 'bt', env)
+	
+	if not err then
+		chunk()
+	end
+	
+	return env
+end
+
 CobraExternalDebugger.SendMessage = function(sData)
-	local sURL = "http://localhost:8080/"
+	local sURL = "http://localhost:" .. api.cobradebugger.sPort .. "/"
 	local sParams = "?request=addmessage"
 	local tHeaders = {"User-Agent: cobra-external-debugger", "Content-Type: application/json"}
-	local nErr,tResponse = api.http.Post(sURL .. sParams, tHeaders, 200, sData)
+	local nErr,tResponse = api.http.Post(sURL .. sParams, tHeaders, api.cobradebugger.nSenderTimeoutMs, sData)
 	
 	return tResponse
 end
@@ -52,9 +65,9 @@ CobraExternalDebugger.SendMessageTask = function()
 end
 
 CobraExternalDebugger.ReceiveMessage = function()
-	local sURL = "http://localhost:8080/"
+	local sURL = "http://localhost:" .. api.cobradebugger.sPort .. "/"
 	local sHeaders = "?request=getcommands"
-	local nErr,tResponse = api.http.Get(sURL .. sHeaders, {"User-Agent: cobra-external-debugger"}, 200)
+	local nErr,tResponse = api.http.Get(sURL .. sHeaders, {"User-Agent: cobra-external-debugger"}, api.cobradebugger.nReceiverTimeoutMs)
 	
 	if tResponse ~= nil then
 		local bSuccess, tBody = ((api.json).Parse)(tResponse.body)
@@ -69,7 +82,7 @@ end
 
 CobraExternalDebugger.ReceiveMessageTask = function()
 	local nLastTickTime = api.time.GetTotalTimeUnscaled()
-	local nTicKTime = 0.5
+	local nTicKTime = api.cobradebugger.nReceiverTickTime
 	local tMessageQueue = {}
 	
 	while (api.cobradebugger.bReceiveMessages) do
@@ -100,6 +113,12 @@ CobraExternalDebugger.ReceiveMessageTask = function()
 end
 
 CobraExternalDebugger.Setup = function()
+	local tConfig = LoadConfig()
+	
+	api.cobradebugger.sPort = tConfig.sPort
+	api.cobradebugger.nReceiverTickTime = tConfig.nReceiverTickTime
+	api.cobradebugger.nReceiverTimeoutMs = tConfig.nReceiverTimeoutMs
+	api.cobradebugger.nSenderTimeoutMs = tConfig.nSenderTimeoutMs
 	api.cobradebugger.tMessageOutputQueue = {}
 	api.cobradebugger.tMessageInputQueue = {}
 	api.cobradebugger.bSendMessages = false
